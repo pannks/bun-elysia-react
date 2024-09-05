@@ -1,0 +1,45 @@
+services:
+    backend:
+        build:
+            context: .
+            dockerfile: backend-01/Dockerfile
+        command: "/bin/sh -c 'bun install && bun run --watch src/index.ts && prisma generate' "
+        entrypoint: []
+        # depends_on:
+        #     - postgres
+        env_file:
+            - ./backend-01/.env
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./backend-01:/home/bun/app
+        networks:
+            - backend-network
+
+    frontend:
+        build:
+            context: .
+            dockerfile: frontend/Dockerfile
+        ports:
+            - "4173:4173"
+        networks:
+            - backend-network
+
+    postgres:
+        image: postgres
+        ports:
+            - "5432:5432"
+        networks:
+            - backend-network
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_USER: postgres
+            POSTGRES_DB: postgres
+
+volumes:
+    postgres-data:
+
+networks:
+    backend-network:
